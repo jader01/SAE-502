@@ -1,38 +1,39 @@
--- Création de la table Client
+-- Table Client
 CREATE TABLE client (
     id_client INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
     entreprise TEXT,
-    projet_associé TEXT
+    projet_associe TEXT
 );
+INSERT INTO client VALUES (1, 'test', 'test', '2508I2503');
 
--- Création de la table Développeur
-CREATE TABLE Developpeur (
+-- Table Developpeur (nous)
+CREATE TABLE developpeur (
     id_dev INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
-    projet_associé TEXT,
-    date_embauche DATE DEFAULT CURRENT_DATE
+    projet_associe TEXT
 );
+INSERT INTO developpeur VALUES (1, 'thomas', '2508I2503');
 
--- Création de la table Rapporteur (peut être un client ou un membre interne)
-CREATE TABLE Rapporteur (
+-- Table Rapporteur 
+CREATE TABLE rapporteur (
     id_rapporteur INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
-    projet_associé TEXT,
-    date_embauche DATE DEFAULT CURRENT_DATE
+    projet_associe TEXT
 );
+INSERT INTO rapporteur VALUES (1, 'jade', '2508I2503');
 
--- Création de la table Ticket
-CREATE TABLE Ticket (
+-- Table Ticket (correction des clés étrangères et des types)
+CREATE TABLE ticket (
     id_ticket INTEGER PRIMARY KEY AUTOINCREMENT,
     titre TEXT NOT NULL,
     description TEXT,
-    statut TEXT CHECK(statut IN ('Ouvert', 'En cours', 'Résolu', 'Fermé')) DEFAULT 'Ouvert',
+    statut TEXT CHECK(statut IN ('Ouvert', 'En cours', 'Resolu', 'Ferme')) DEFAULT 'Ouvert',
     priorite TEXT CHECK(priorite IN ('P1', 'P2', 'P3', 'P4')) DEFAULT 'P3',
     id_rapporteur INTEGER,
     id_dev INTEGER,
     id_client INTEGER,
-    FOREIGN KEY (id_rapporteur) REFERENCES Rapporteur(id_rapporteur),
-    FOREIGN KEY (id_dev) REFERENCES Developpeur(id_dev),
-    FOREIGN KEY (id_client) REFERENCES client(id_dev),
+    FOREIGN KEY (id_rapporteur) REFERENCES rapporteur(id_rapporteur),
+    FOREIGN KEY (id_dev) REFERENCES developpeur(id_dev),
+    FOREIGN KEY (id_client) REFERENCES client(id_client)
 );
