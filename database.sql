@@ -23,7 +23,7 @@ CREATE TABLE rapporteur (
 );
 INSERT INTO rapporteur VALUES (1, 'jade', '2508I2503');
 
--- Table Ticket (correction des clés étrangères et des types)
+-- Table Ticket 
 CREATE TABLE ticket (
     id_ticket INTEGER PRIMARY KEY AUTOINCREMENT,
     titre TEXT NOT NULL,
