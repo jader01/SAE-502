@@ -5,7 +5,9 @@ class AuthController
 {
     public function login(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $username = trim($_POST["username"]);
@@ -31,7 +33,9 @@ class AuthController
 
     public function register(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $username = trim($_POST["username"]);
@@ -53,7 +57,9 @@ class AuthController
 
     public function logout(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         session_destroy();
         header("Location: /login");
         exit();
@@ -61,7 +67,9 @@ class AuthController
 
     public static function requireLogin(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (empty($_SESSION["user"])) {
             header("Location: /login");
             exit();

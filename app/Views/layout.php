@@ -11,22 +11,31 @@
   <title><?= $title ?? "Gestion de tickets" ?></title>
 </head>
 <body>
-  <header>
+
+    <?php if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    } ?>
+    <header>
+      <h1>Centre d’assistance</h1>
       <?php if (!empty($_SESSION["user"])): ?>
-          Bonjour, <?= htmlspecialchars($_SESSION["user"]["username"]) ?>
-          (<a href="/logout">Déconnexion</a>)
-        <?php else: ?>
-          <a href="/login">Connexion</a>
-          <a href="/register"> Inscription</a>
-
+        Bonjour, <?= htmlspecialchars($_SESSION["user"]["username"]) ?> |
+        Rôle: <?= htmlspecialchars($_SESSION["user"]["role"]) ?> |
+        <?php if ($_SESSION["user"]["role"] === "rapporteur"): ?>
+          <a href="/ticket/create">Créer un ticket</a>
         <?php endif; ?>
-
-  </header>
+        <?php if ($_SESSION["user"]["role"] === "developpeur"): ?>
+          <a href="/ticket/list">Voir les tickets</a>
+        <?php endif; ?>
+        | <a href="/logout">Déconnexion</a>
+      <?php else: ?>
+        <a href="/login">Connexion</a> | <a href="/register">Inscription</a>
+      <?php endif; ?>
+      <hr>
+    </header>
 
   <main>
-      <h1>Centre d'Assistance</h1>
 
-      <hr>
+
     <?= $content ?>
   </main>
 </body>

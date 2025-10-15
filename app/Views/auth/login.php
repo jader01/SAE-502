@@ -1,4 +1,7 @@
 <?php
+/**
+ * @var string|null $error
+ */
 $title = "Connexion";
 ob_start();
 ?>
