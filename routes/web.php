@@ -25,7 +25,21 @@ switch ($request) {
         // fallback
         echo "Rôle inconnu.";
         break;
+    case "/admin":
+    case "/admin/dashboard":
+        require_once __DIR__ . "/../app/Controllers/AdminController.php";
+        new AdminController()->dashboard();
+        break;
 
+    case "/admin/clients":
+        require_once __DIR__ . "/../app/Controllers/AdminController.php";
+        new AdminController()->handleClients();
+        break;
+
+    case "/admin/projects":
+        require_once __DIR__ . "/../app/Controllers/AdminController.php";
+        new AdminController()->handleProjects();
+        break;
     case "/projects":
         require_once __DIR__ . "/../app/Controllers/TicketController.php";
         new TicketController()->fetchProjects();

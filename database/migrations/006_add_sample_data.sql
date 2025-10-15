@@ -1,8 +1,8 @@
 -- USERS
 INSERT INTO users (username, password, role) VALUES
 ('dev', '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'developpeur'),
-('rap', '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'rapporteur');
-
+('rap', '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'rapporteur'),
+('admin','$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'admin');
 --   dev / test1234
 --   rap / test1234
 
