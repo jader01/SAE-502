@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    contact_email TEXT,
+    contact_phone TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

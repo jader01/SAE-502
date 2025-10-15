@@ -1,0 +1,6 @@
+001_create_ticket.sql
+002_create_users.sql
+003_create_clients.sql
+004_create_projects.sql
+005_create_ticket_evolution.sql
+006_create_sample_data.sql
