@@ -6,6 +6,8 @@
 $title = "Liste des tickets";
 ob_start();
 ?>
+
+<a href="/ticket/create">Créer un ticket</a>
 <h2>Tickets existants</h2>
 <table border="1">
   <tr><th>ID</th><th>Titre</th><th>Description</th><th>Statut</th></tr>

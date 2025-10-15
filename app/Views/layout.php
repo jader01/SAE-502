@@ -12,13 +12,21 @@
 </head>
 <body>
   <header>
-    <h1>Centre d'Assistance</h1>
-    <a href="/">Liste des tickets</a> |
-    <a href="/ticket/create">Créer un ticket</a>
-    <hr>
+      <?php if (!empty($_SESSION["user"])): ?>
+          Bonjour, <?= htmlspecialchars($_SESSION["user"]["username"]) ?>
+          (<a href="/logout">Déconnexion</a>)
+        <?php else: ?>
+          <a href="/login">Connexion</a>
+          <a href="/register"> Inscription</a>
+
+        <?php endif; ?>
+
   </header>
 
   <main>
+      <h1>Centre d'Assistance</h1>
+
+      <hr>
     <?= $content ?>
   </main>
 </body>
