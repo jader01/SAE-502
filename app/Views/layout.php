@@ -20,6 +20,9 @@
       <?php if (!empty($_SESSION["user"])): ?>
         Bonjour, <?= htmlspecialchars($_SESSION["user"]["username"]) ?> |
         Rôle: <?= htmlspecialchars($_SESSION["user"]["role"]) ?> |
+        <?php if ($_SESSION["user"]["role"] === "admin"): ?>
+              <a href="/admin">Admin</a> |
+        <?php endif; ?>
         <?php if ($_SESSION["user"]["role"] === "rapporteur"): ?>
           <a href="/ticket/create">Créer un ticket</a>
         <?php endif; ?>
