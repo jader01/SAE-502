@@ -102,4 +102,68 @@ class TicketController
         echo json_encode($projects);
         exit();
     }
+
+    public function takeTicket(): void
+    {
+        session_start();
+        if (
+            !in_array($_SESSION["user"]["role"], ["developpeur", "admin"], true)
+        ) {
+            http_response_code(403);
+            exit("Accès réservé aux développeurs.");
+        }
+
+        $ticketId = (int) ($_GET["id"] ?? 0);
+        if ($ticketId > 0) {
+            Ticket::assignToDeveloper($ticketId, $_SESSION["user"]["id"]);
+        }
+        header("Location: /ticket/list");
+        exit();
+    }
+
+    public function updateTicket(): void
+    {
+        session_start();
+        if (
+            !in_array($_SESSION["user"]["role"], ["developpeur", "admin"], true)
+        ) {
+            http_response_code(403);
+            exit("Accès réservé aux développeurs.");
+        }
+
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $ticketId = (int) $_POST["ticket_id"];
+            $evolution = $_POST["evolution"];
+            $status = $_POST["status"];
+            Ticket::updateEvolution($ticketId, $evolution, $status);
+
+            Ticket::logEvolution(
+                $ticketId,
+                $_SESSION["user"]["id"],
+                $evolution,
+                $status,
+            );
+        }
+
+        header("Location: /ticket/list");
+        exit();
+    }
+
+    public function showTicket(): void
+    {
+        session_start();
+        $ticketId = (int) ($_GET["id"] ?? 0);
+        if ($ticketId <= 0) {
+            http_response_code(404);
+            exit("Ticket introuvable.");
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT * FROM tickets WHERE id = ?");
+        $stmt->execute([$ticketId]);
+        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+        $history = Ticket::getEvolutionHistory($ticketId);
+
+        include __DIR__ . "/../Views/tickets/show.php";
+    }
 }
