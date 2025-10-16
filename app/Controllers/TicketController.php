@@ -14,7 +14,9 @@ class TicketController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        if ($_SESSION["user"]["role"] !== "developpeur") {
+        if (
+            !in_array($_SESSION["user"]["role"], ["developpeur", "admin"], true)
+        ) {
             http_response_code(403);
             echo "Accès refusé : réservé aux développeurs.";
             exit();
@@ -36,7 +38,9 @@ class TicketController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        if ($_SESSION["user"]["role"] !== "rapporteur") {
+        if (
+            !in_array($_SESSION["user"]["role"], ["rapporteur", "admin"], true)
+        ) {
             http_response_code(403);
             echo "Accès refusé : réservé aux rapporteurs.";
             exit();
@@ -85,7 +89,9 @@ class TicketController
             exit();
         }
 
-        if ($_SESSION["user"]["role"] !== "rapporteur") {
+        if (
+            !in_array($_SESSION["user"]["role"], ["rapporteur", "admin"], true)
+        ) {
             http_response_code(403);
             echo json_encode(["error" => "Accès refusé"]);
             exit();

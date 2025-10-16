@@ -53,8 +53,8 @@ class Ticket
         $db = Database::getConnection();
         $stmt = $db->prepare(
             "INSERT INTO tickets
-             (title, description, project_id, client_id, priority, user_id)
-             VALUES (?, ?, ?, ?, ?, ?)",
+             (title, description, project_id, client_id, priority, user_id,developer_id,status,evolution)
+             VALUES (?, ?, ?, ?, ?, ?, NULL,'open', '')",
         );
         $stmt->execute([
             $title,

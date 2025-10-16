@@ -22,10 +22,16 @@ switch ($request) {
             header("Location: /ticket/create");
             exit();
         }
+        if ($_SESSION["user"]["role"] === "admin") {
+            header("Location: /admin/dashboard");
+            exit();
+        }
         // fallback
         echo "Rôle inconnu.";
         break;
+
     case "/admin":
+
     case "/admin/dashboard":
         require_once __DIR__ . "/../app/Controllers/AdminController.php";
         new AdminController()->dashboard();
@@ -40,6 +46,7 @@ switch ($request) {
         require_once __DIR__ . "/../app/Controllers/AdminController.php";
         new AdminController()->handleProjects();
         break;
+
     case "/projects":
         require_once __DIR__ . "/../app/Controllers/TicketController.php";
         new TicketController()->fetchProjects();
