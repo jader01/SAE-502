@@ -3,6 +3,14 @@ require_once __DIR__ . "/../Models/User.php";
 
 class AuthController
 {
+    /**
+     * Handle user login.
+     *
+     * On GET: displays the login form.
+     * On POST: verifies credentials and initializes session.
+     *
+     * @return void
+     */
     public function login(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -31,30 +39,13 @@ class AuthController
         include __DIR__ . "/../Views/auth/login.php";
     }
 
-    public function register(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        if ($_SERVER["REQUEST_METHOD"] === "POST") {
-            $username = trim($_POST["username"]);
-            $password = $_POST["password"];
-            $role = $_POST["role"] ?? "rapporteur";
-
-            if (User::findByUsername($username)) {
-                $error = "Ce nom d'utilisateur existe déjà.";
-            } elseif (strlen($password) < 4) {
-                $error = "Le mot de passe est trop court.";
-            } else {
-                User::create($username, $password, $role);
-                header("Location: /login");
-                exit();
-            }
-        }
-        include __DIR__ . "/../Views/auth/register.php";
-    }
-
+    /**
+     * Log the current user out.
+     *
+     * Clears session data and redirects to the login page.
+     *
+     * @return void
+     */
     public function logout(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -65,6 +56,13 @@ class AuthController
         exit();
     }
 
+    /**
+     * Require an authenticated session.
+     *
+     * If not logged in, redirects to the login page.
+     *
+     * @return void
+     */
     public static function requireLogin(): void
     {
         if (session_status() === PHP_SESSION_NONE) {

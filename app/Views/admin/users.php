@@ -1,36 +1,41 @@
 <?php
-/**
- * @var array<int, array{ id:int, username:string, role:string, created_at:string }> $users
- */
+/** @var array<int, array<string, mixed>> $users */
 $title = "Admin – Utilisateurs";
 ob_start();
 ?>
-<h2>Gestion des utilisateurs</h2>
+<h2 class="mb-4">Gestion des utilisateurs</h2>
 
-<button id="openCreateBtn">➕ Ajouter un utilisateur</button>
+<button id="openCreateBtn" class="btn btn-primary mb-3">Ajouter un utilisateur</button>
 
-
-<table border="1" cellpadding="6" style="margin-top:15px;">
-  <tr><th>ID</th><th>Nom</th><th>Rôle</th><th>Créé le</th><th>Action</th></tr>
-  <?php foreach ($users as $u): ?>
-  <tr>
-    <td><?= $u["id"] ?></td>
-    <td><?= htmlspecialchars($u["username"]) ?></td>
-    <td><?= htmlspecialchars($u["role"]) ?></td>
-    <td><?= htmlspecialchars($u["created_at"]) ?></td>
-    <td>
-      <button class="editBtn"
-        data-id="<?= $u["id"] ?>"
-        data-username="<?= htmlspecialchars($u["username"]) ?>"
-        data-role="<?= $u["role"] ?>">Modifier</button>
-      <?php if ($u["id"] != $_SESSION["user"]["id"]): ?>
-        | <a href="/admin/users?delete=<?= $u[
-            "id"
-        ] ?>" onclick="return confirm('Supprimer cet utilisateur ?')">supprimer</a>
-      <?php endif; ?>
-    </td>
-  </tr>
-  <?php endforeach; ?>
+<table class="table table-striped table-bordered datatable align-middle">
+  <thead class="table-primary">
+    <tr>
+      <th>ID</th><th>Nom</th><th>Rôle</th><th>Créé le</th><th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php foreach ($users as $u): ?>
+    <tr>
+      <td><?= $u["id"] ?></td>
+      <td><?= htmlspecialchars($u["username"]) ?></td>
+      <td><span class="badge bg-secondary"><?= htmlspecialchars(
+          $u["role"],
+      ) ?></span></td>
+      <td><?= htmlspecialchars($u["created_at"]) ?></td>
+      <td>
+        <button class="btn btn-sm btn-outline-warning editBtn"
+          data-id="<?= $u["id"] ?>"
+          data-username="<?= htmlspecialchars($u["username"]) ?>"
+          data-role="<?= $u["role"] ?>">Modifier</button>
+        <?php if ($u["id"] != $_SESSION["user"]["id"]): ?>
+          <a href="/admin/users?delete=<?= $u["id"] ?>"
+             class="btn btn-sm btn-outline-danger"
+             onclick="return confirm('Supprimer cet utilisateur ?');">Supprimer</a>
+        <?php endif; ?>
+      </td>
+    </tr>
+    <?php endforeach; ?>
+  </tbody>
 </table>
 
 

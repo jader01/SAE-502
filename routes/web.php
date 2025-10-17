@@ -1,9 +1,11 @@
 <?php
+// Basic router
 $request = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 switch ($request) {
+    // Redirect users based on role
     case "/":
         if (isset($_SESSION["user"]) && isset($_SESSION["user"]["role"])) {
             switch ($_SESSION["user"]["role"]) {
@@ -11,7 +13,7 @@ switch ($request) {
                     header("Location: /ticket/list");
                     exit();
                 case "rapporteur":
-                    header("Location: /ticket/create");
+                    header("Location: /ticket/list");
                     exit();
                 case "admin":
                     header("Location: /admin/dashboard");
@@ -25,8 +27,8 @@ switch ($request) {
             exit();
         }
 
+    // Admin area
     case "/admin":
-
     case "/admin/dashboard":
         require_once __DIR__ . "/../app/Controllers/AdminController.php";
         new AdminController()->dashboard();
@@ -47,15 +49,16 @@ switch ($request) {
         new AdminController()->handleUsers();
         break;
 
+    case "/admin/statistics":
+        require_once __DIR__ . "/../app/Controllers/AdminController.php";
+        new AdminController()->statistics();
+        break;
+
+    // Ticket management
     case "/ticket/create":
         require_once __DIR__ . "/../app/Controllers/TicketController.php";
 
-        new TicketController()->createForRapporteur();
-        break;
-
-    case "/admin/statistics":
-        require_once __DIR__ . "/../app/Controllers/AdminController.php";
-        new AdminController()->statisticsText();
+        new TicketController()->create();
         break;
 
     case "/ticket/take":
@@ -68,9 +71,17 @@ switch ($request) {
         new TicketController()->updateTicket();
         break;
 
+    case "/ticket/edit":
+        require_once __DIR__ . "/../app/Controllers/AuthController.php";
+        AuthController::requireLogin();
+
+        require_once __DIR__ . "/../app/Controllers/TicketController.php";
+        new TicketController()->editTicket();
+        break;
+
     case "/ticket/list":
         require_once __DIR__ . "/../app/Controllers/TicketController.php";
-        new TicketController()->listForDeveloper();
+        new TicketController()->list();
         break;
 
     case "/ticket/show":
@@ -87,6 +98,7 @@ switch ($request) {
         new TicketController()->deleteTicket();
         break;
 
+    // AJAX: Load projects by client
     case "/projects":
         require_once __DIR__ . "/../app/Controllers/AuthController.php";
         AuthController::requireLogin();
@@ -95,19 +107,18 @@ switch ($request) {
         new TicketController()->fetchProjects();
         exit();
 
+    // Authentication
     case "/login":
         require_once __DIR__ . "/../app/Controllers/AuthController.php";
         new AuthController()->login();
         break;
-    case "/register":
-        require_once __DIR__ . "/../app/Controllers/AuthController.php";
-        new AuthController()->register();
-        break;
+
     case "/logout":
         require_once __DIR__ . "/../app/Controllers/AuthController.php";
         new AuthController()->logout();
         break;
 
+    // Fallback
     default:
         http_response_code(404);
         echo "404 Not Found";

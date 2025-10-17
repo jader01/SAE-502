@@ -1,26 +1,131 @@
- -- USERS
- INSERT INTO users (username, password, role) VALUES
- ('dev', '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'developpeur'),
-('rap', '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'rapporteur'),
-('admin','$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'admin');
- --   dev / test1234
- --   rap / test1234
 
+DELETE FROM users;
+INSERT INTO users (username, password, role) VALUES
+('admin', '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'admin'),
+('rap1',  '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'rapporteur'),
+('rap2',  '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'rapporteur'),
+('dev1',  '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'developpeur'),
+('dev2',  '$2y$12$kuR5epXlCiEko3ZttESf/e5EzHZ/h4swINwR/n9ZvuBfNK35hOnQS', 'developpeur');
+-- password : test1234
+--
+DELETE FROM clients;
+INSERT INTO clients (name, contact_email, contact_phone) VALUES
+('Client A', 'a@example.com', '0101010101'),
+('Client B', 'b@example.com', '0202020202'),
+('Client C', 'c@example.com', '0303030303'),
+('Client D', 'd@example.com', '0404040404'),
+('Client E', 'e@example.com', '0505050505');
 
- -- CLIENTS
- INSERT INTO clients (name, contact_email, contact_phone) VALUES
- ('Client A', 'a@example.com', '0101010101'),
- ('Client B', 'b@example.com', '0202020202');
+DELETE FROM projects;
+INSERT INTO projects (name, description, client_id) VALUES
+('Project Alpha', 'Alpha project for Client A', 1),
+('Project Beta', 'Beta project for Client B', 2),
+('Project Gamma', 'Gamma project for Client C', 3),
+('Project Delta', 'Delta project for Client D', 4),
+('Project Epsilon', 'Epsilon project for Client E', 5);
 
- -- PROJECTS
- INSERT INTO projects (name, description, client_id) VALUES
- ('Project Alpha', 'Alpha project for Client A', 1),
- ('Project Beta', 'Beta project for Client B', 2);
+DELETE FROM tickets;
+INSERT INTO tickets (title, description, project_id, client_id, priority, status, user_id, developer_id, evolution, created_at) VALUES
+('Login error', 'Users cannot log in.', 1, 1, 'p1', 'open', 2, NULL, 'Waiting assignment', datetime('now','-2 day')),
+('UI bug', 'Dashboard numbers misaligned.', 2, 2, 'p3', 'open', 2, NULL, 'Pending triage', datetime('now','-1 day')),
+('Performance slow', 'API response times above 5s', 3, 3, 'p2', 'open', 2, NULL, 'Investigating', datetime('now','-3 day')),
+('Page crash', 'Crash on settings save.', 4, 4, 'p1', 'open', 2, NULL, 'Reported', datetime('now','-5 day')),
+('Export issue', 'CSV export missing fields.', 5, 5, 'p2', 'open', 2, NULL, 'Under analysis', datetime('now','-6 day')),
+('Broken search', 'Search returns wrong results.', 2, 2, 'p2', 'open', 3, NULL, 'To be replicated', datetime('now','-4 day')),
+('Notifications delayed', 'Email notifications too slow.', 1, 1, 'p3', 'open', 3, NULL, 'Investigating SMTP', datetime('now','-7 day')),
+('Session timeout', 'Users signed out too soon.', 3, 3, 'p2', 'open', 3, NULL, 'Awaiting feedback', datetime('now','-8 day')),
+('Mobile crash', 'App crashes on launch iOS.', 4, 4, 'p1', 'open', 2, NULL, 'High priority bug', datetime('now','-9 day')),
+('Security warning', 'New security scan warning.', 5, 5, 'p1', 'open', 2, NULL, 'Need developer input', datetime('now','-10 day')),
 
- -- TICKETS
- INSERT INTO tickets (title, description, project_id, client_id, priority, status, user_id, developer_id, evolution)
- VALUES
- ('Login failure', 'Users cannot login after update.', 1, 1, 'p1', 'open', 2, NULL, 'Hotfix in progress'),
- ('UI glitch', 'Alignment issue on dashboard.', 2, 2, 'p3', 'in_progress', 2, 1, 'UI review pending'),
- ('Crash on Save', 'App crashes when saving user data.', 2, 2, 'p1', 'open', 2, NULL, 'Awaiting developer assignment'),
- ('Slow report generation', 'Reports take too long to load.', 1, 1, 'p2', 'open', 2, NULL, 'Monitoring performance');
+('Styling fix', 'Navbar color mismatch.', 1, 1, 'p3', 'in_progress', 2, 4, 'Fixing CSS', datetime('now','-1 day')),
+('Cache issue', 'Old data displayed.', 1, 1, 'p2', 'in_progress', 3, 5, 'Clearing cache config', datetime('now','-2 day')),
+('Pagination broken', 'Next page doesn’t load.', 2, 2, 'p2', 'in_progress', 3, 4, 'Working on offset bug', datetime('now','-3 day')),
+('Graph not showing', 'Empty placeholder.', 3, 3, 'p2', 'in_progress', 2, 4, 'Adding debug logs', datetime('now','-4 day')),
+('Email duplicates', 'Multiple notifications sent.', 4, 4, 'p3', 'in_progress', 2, 5, 'Testing messaging queue', datetime('now','-5 day')),
+('Language error', 'Some texts not translated.', 5, 5, 'p3', 'in_progress', 3, 4, 'Adding FR locale', datetime('now','-6 day')),
+('Upload limit', 'User cannot upload >10MB.', 5, 5, 'p2', 'in_progress', 2, 5, 'Increasing limit', datetime('now','-7 day')),
+('Session lock', 'Concurrent login issue.', 4, 4, 'p1', 'in_progress', 2, 5, 'Applying token update', datetime('now','-8 day')),
+('Quota error', 'License exceeded unexpectedly.', 3, 3, 'p2', 'in_progress', 3, 4, 'Reviewing logs', datetime('now','-9 day')),
+('Dashboard blank', 'Admin dashboard fails to load.', 2, 2, 'p1', 'in_progress', 3, 4, 'Fix tested', datetime('now','-10 day')),
+('Upload crash', 'File upload crashes', 1, 1, 'p1', 'in_progress', 2, 4, 'Under fix', datetime('now','-11 day')),
+('Backup failed', 'Nightly backup not working.', 2, 2, 'p2', 'in_progress', 3, 5, 'Investigating script', datetime('now','-12 day')),
+('End date invalid', 'Incorrect date handling.', 3, 3, 'p3', 'in_progress', 3, 5, 'Adding validation', datetime('now','-13 day')),
+('Unread count', 'Badge count incorrect.', 4, 4, 'p3', 'in_progress', 2, 4, 'Rewriting query', datetime('now','-14 day')),
+('Installer error', 'Setup fails Windows.', 5, 5, 'p1', 'in_progress', 2, 4, 'Testing patch', datetime('now','-15 day')),
+('Summary mismatch', 'Numbers do not add up.', 1, 1, 'p2', 'in_progress', 3, 5, 'Rounding bug', datetime('now','-16 day')),
+('Performance degrade', 'Recently slower queries.', 3, 3, 'p2', 'in_progress', 2, 4, 'Analyzing logs', datetime('now','-17 day')),
+('Profile bug', 'Edit form fails validation.', 4, 4, 'p1', 'in_progress', 2, 5, 'Patched locally', datetime('now','-18 day')),
+('Missing invoices', 'Invoice export incomplete.', 5, 5, 'p2', 'in_progress', 2, 4, 'Investigating', datetime('now','-19 day')),
+('Image resize', 'Wrong size ratio.', 2, 2, 'p3', 'in_progress', 3, 5, 'Fix merged pending test', datetime('now','-20 day')),
+('Error 500', 'Internal error on submission.', 3, 3, 'p1', 'in_progress', 2, 5, 'Fix confirmed', datetime('now','-21 day')),
+('Login bug', 'Session expired incorrectly.', 1, 1, 'p2', 'in_progress', 3, 5, 'Under code review', datetime('now','-22 day')),
+('CSV corrupted', 'Export file broken.', 4, 4, 'p3', 'in_progress', 2, 4, 'Fix under review', datetime('now','-23 day')),
+('Settings lost', 'Preferences not saved.', 5, 5, 'p3', 'in_progress', 3, 5, 'Unit test failing', datetime('now','-24 day')),
+('Survey issue', 'Survey results duplicate.', 2, 2, 'p3', 'in_progress', 2, 4, 'Analyzing SQL JOIN', datetime('now','-25 day')),
+('Request timeout', 'POST requests timeout.', 1, 1, 'p2', 'in_progress', 3, 5, 'Trying async calls', datetime('now','-26 day')),
+('Auto‑logout', 'Short session bug.', 3, 3, 'p2', 'in_progress', 3, 5, 'Fix merged', datetime('now','-27 day')),
+('Graph export', 'Graph export PDF bug.', 4, 4, 'p3', 'in_progress', 2, 4, 'Release testing', datetime('now','-28 day')),
+('Duplicated tags', 'Duplicate labels appear.', 5, 5, 'p3', 'in_progress', 2, 5, 'Ready for QA', datetime('now','-29 day')),
+('Calculator bug', 'Totals not correct.', 1, 1, 'p2', 'in_progress', 3, 5, 'Deployed to staging', datetime('now','-30 day')),
+
+('Broken link', 'Link 404 on homepage.', 1, 1, 'p3', 'closed', 2, 4, 'Fixed in v1.2.1', datetime('now','-35 day')),
+('Email typo', 'Typo in welcome email.', 2, 2, 'p3', 'closed', 3, 5, 'Fixed', datetime('now','-40 day')),
+('Password reset', 'Reset email not sent.', 3, 3, 'p1', 'closed', 2, 4, 'Resolved', datetime('now','-33 day')),
+('Crash menu', 'Crash when opening reports.', 4, 4, 'p1', 'closed', 3, 5, 'Patched', datetime('now','-45 day')),
+('Performance bug', 'Slow dashboard load.', 5, 5, 'p2', 'closed', 2, 5, 'Optimized', datetime('now','-50 day')),
+('Registration bug', 'Signup fails.', 1, 1, 'p1', 'closed', 3, 5, 'Fixed', datetime('now','-55 day')),
+('Overflow', 'UI overflow fixed.', 2, 2, 'p3', 'closed', 2, 4, 'Fixed minor UI', datetime('now','-60 day')),
+('Unicode bug', 'Encoding issue resolved.', 3, 3, 'p3', 'closed', 3, 5, 'Resolved encoding', datetime('now','-65 day')),
+('Permission bug', 'Role check issue.', 4, 4, 'p1', 'closed', 2, 4, 'Solved', datetime('now','-70 day')),
+('Timeout bug', 'API timeout fixed.', 5, 5, 'p2', 'closed', 3, 5, 'Patched', datetime('now','-75 day')),
+('Crash 404', 'Error handled properly.', 2, 2, 'p2', 'closed', 2, 5, 'Hotfix deployed', datetime('now','-76 day')),
+('Night job failed', 'Cron script fixed.', 3, 3, 'p3', 'closed', 3, 5, 'OK', datetime('now','-77 day')),
+('Config issue', 'Default config corrected.', 4, 4, 'p2', 'closed', 2, 5, 'Auto‑tested', datetime('now','-78 day')),
+('CSS fix', 'Minor style bug.', 5, 5, 'p3', 'closed', 2, 4, 'Deployed', datetime('now','-80 day')),
+('Icon missing', 'Icon added.', 1, 1, 'p3', 'closed', 3, 5, 'Delivered', datetime('now','-85 day')),
+('Crash 500', 'Fixed error 500.', 2, 2, 'p1', 'closed', 2, 5, 'Fixed regression', datetime('now','-90 day')),
+('Upload bug', 'File upload corrected.', 3, 3, 'p2', 'closed', 3, 4, 'Validated', datetime('now','-95 day')),
+('Profile fix', 'User profile saved.', 4, 4, 'p2', 'closed', 2, 4, 'QA passed', datetime('now','-100 day')),
+('Logs truncated', 'Log cleanup OK.', 5, 5, 'p3', 'closed', 2, 5, 'Stable', datetime('now','-110 day')),
+('Translation done', 'New languages added.', 1, 1, 'p3', 'closed', 3, 5, 'Released', datetime('now','-115 day'));
+
+INSERT INTO tickets (title, description, project_id, client_id, priority, status, user_id, developer_id, evolution, created_at) VALUES
+('Sync failed', 'Data sync fails occasionally.', 1, 1, 'p2', 'open', 2, NULL, 'Awaiting replication', datetime('now', '-1 day')),
+('Missing chart', 'Sales chart not visible.', 2, 2, 'p3', 'in_progress', 3, 4, 'Fix on staging', datetime('now', '-2 days')),
+('Crash report', 'Unhandled exception in module.', 3, 3, 'p1', 'closed', 2, 5, 'Fixed hot', datetime('now', '-3 days')),
+('Email spam', 'Multiple duplicate emails sent.', 4, 4, 'p2', 'open', 3, NULL, 'Reviewing logs', datetime('now', '-4 days')),
+('CSS layout broken', 'Mobile view misaligned.', 5, 5, 'p3', 'in_progress', 2, 4, 'Refactoring grid', datetime('now', '-5 days')),
+('Login delay', 'Slow login response.', 1, 1, 'p2', 'open', 2, NULL, 'Monitoring performance', datetime('now', '-6 days')),
+('Password loop', 'User reset stuck.', 2, 2, 'p1', 'closed', 3, 5, 'Patched', datetime('now', '-7 days')),
+('Analytics issue', 'Stats not updating daily.', 3, 3, 'p2', 'open', 2, NULL, 'Awaiting dev fix', datetime('now', '-8 days')),
+('Corrupted PDF', 'Generated report unusable.', 4, 4, 'p1', 'in_progress', 3, 5, 'Implementing converter', datetime('now', '-9 days')),
+('Timeouts increase', 'API timeout spikes.', 5, 5, 'p2', 'open', 2, NULL, 'Investigating infra', datetime('now', '-10 days')),
+('Notification loop', 'Users receive same alert twice.', 1, 1, 'p3', 'closed', 3, 4, 'Fixed subscription', datetime('now', '-12 days')),
+('Search stuck', 'Infinite loading on search.', 2, 2, 'p2', 'open', 2, NULL, 'Triage', datetime('now', '-13 days')),
+('Broken image', 'Icons missing randomly.', 3, 3, 'p3', 'in_progress', 2, 5, 'Fix pending', datetime('now', '-13 days')),
+('PDF export crash', 'Export button causes error.', 4, 4, 'p1', 'closed', 3, 5, 'Resolved with update', datetime('now', '-14 days')),
+('Invalid totals', 'Calculation wrong on summary.', 5, 5, 'p2', 'in_progress', 2, 4, 'Writing test cases', datetime('now', '-15 days')),
+('UI freeze', 'App freezes on clicking menu.', 1, 1, 'p1', 'open', 2, NULL, 'High priority bug', datetime('now', '-16 days')),
+('Broken form', 'Submit button missing.', 2, 2, 'p2', 'closed', 3, 5, 'Fixed', datetime('now', '-17 days')),
+('Delayed cron', 'Night jobs delayed.', 3, 3, 'p3', 'in_progress', 2, 4, 'Debugging time diff', datetime('now', '-18 days')),
+('Video upload fails', 'Upload cancels halfway.', 4, 4, 'p1', 'open', 3, NULL, 'Awaiting dev review', datetime('now', '-19 days')),
+('Audit error', 'Audit trail incomplete.', 5, 5, 'p2', 'closed', 2, 4, 'Completed', datetime('now', '-20 days')),
+('File corruption', 'Corrupted CSV export.', 2, 2, 'p1', 'open', 2, NULL, 'Pending dev assignment', datetime('now', '-21 days')),
+('UI overlap', 'Buttons overlap labels.', 3, 3, 'p3', 'in_progress', 3, 4, 'Fixed on branch', datetime('now', '-22 days')),
+('Timeout', 'Long query times.', 1, 1, 'p2', 'open', 2, NULL, 'Investigating DB', datetime('now', '-23 days')),
+('Backend crash', 'Server error in logs.', 4, 4, 'p1', 'closed', 3, 5, 'Patched', datetime('now', '-24 days')),
+('Table miscount', 'Dashboard totals mismatch.', 5, 5, 'p3', 'in_progress', 2, 4, 'Audit numbers', datetime('now', '-25 days')),
+('Invoice bug', 'Invoice PDF missing logo.', 1, 1, 'p3', 'open', 3, NULL, 'Queued for dev', datetime('now', '-26 days')),
+('Notification spam', 'Multiple alert emails.', 2, 2, 'p2', 'open', 2, NULL, 'Under analysis', datetime('now', '-27 days')),
+('Batch job fail', 'Automated script error.', 3, 3, 'p1', 'in_progress', 2, 5, 'Rewriting batch', datetime('now', '-28 days')),
+('Customer data loss', 'Records deleted.', 5, 5, 'p1', 'closed', 3, 4, 'Resolved critical', datetime('now', '-29 days')),
+('Analytics drop', 'Data drop since midnight.', 4, 4, 'p2', 'open', 2, NULL, 'Monitoring fix', datetime('now', '-30 days')),
+('Feature rollback', 'Update caused regression.', 1, 1, 'p1', 'closed', 3, 5, 'Rolled back', datetime('now', '-31 days')),
+('Performance regression', 'After deployment.', 2, 2, 'p2', 'open', 3, NULL, 'Investigating', datetime('now', '-32 days')),
+('Email template issue', 'Footer missing date.', 3, 3, 'p3', 'closed', 2, 4, 'Fixed', datetime('now', '-33 days')),
+('Session persistence', 'User kicked out unexpectedly.', 5, 5, 'p2', 'in_progress', 2, 4, 'Reproduced issue', datetime('now', '-34 days')),
+('Translation errors', 'Missing FR locales.', 1, 1, 'p3', 'closed', 3, 5, 'Delivered', datetime('now', '-35 days')),
+('Graph anomaly', 'Chart data wrong.', 2, 2, 'p2', 'open', 2, NULL, 'Analyzing', datetime('now', '-36 days')),
+('Upload retry fails', 'Retry doesn’t restart.', 3, 3, 'p1', 'closed', 3, 5, 'Resolved', datetime('now', '-37 days')),
+('Push notification delay', 'Notifications 15min late.', 4, 4, 'p2', 'open', 3, NULL, 'Checking server queue', datetime('now', '-38 days')),
+('Overflow error', 'Counter overflows at 999.', 5, 5, 'p3', 'closed', 2, 4, 'Patched', datetime('now', '-39 days'));

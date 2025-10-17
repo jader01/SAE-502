@@ -3,6 +3,12 @@ require_once __DIR__ . "/Database.php";
 
 class User
 {
+    /**
+     * Find a user by username.
+     *
+     * @param string $username User’s username
+     * @return array<string, mixed>|null User data if found, otherwise null
+     */
     public static function findByUsername(string $username): ?array
     {
         $db = Database::getConnection();
@@ -12,6 +18,14 @@ class User
         return $user ?: null;
     }
 
+    /**
+     * Create a user account (used during registration).
+     *
+     * @param string $username User’s username
+     * @param string $password Plain‑text password
+     * @param string $role     User role ('admin', 'developpeur', 'rapporteur')
+     * @return void
+     */
     public static function create(
         string $username,
         string $password,
@@ -28,7 +42,7 @@ class User
     /**
      * Retrieve all users.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>> List of all users
      */
     public static function getAll(): array
     {
@@ -40,11 +54,11 @@ class User
     }
 
     /**
-     * Create a new user.
+     * Create a new user (admin-level operation).
      *
-     * @param string $username
-     * @param string $password
-     * @param string $role ('admin', 'developpeur', 'rapporteur')
+     * @param string $username Username for the new user
+     * @param string $password Plain‑text password
+     * @param string $role     Assigned role
      * @return void
      */
     public static function createUser(
@@ -61,12 +75,14 @@ class User
     }
 
     /**
-     * Update an existing user.
+     * Update an existing user entry.
      *
-     * @param int $id
-     * @param string $username
-     * @param string|null $password
-     * @param string $role
+     * Updates password only if provided.
+     *
+     * @param int         $id       User ID
+     * @param string      $username New username
+     * @param string|null $password New password (optional)
+     * @param string      $role     Updated role
      * @return void
      */
     public static function updateUser(
@@ -93,7 +109,7 @@ class User
     /**
      * Delete a user by ID.
      *
-     * @param int $id
+     * @param int $id User ID to delete
      * @return void
      */
     public static function deleteUser(int $id): void
