@@ -15,14 +15,21 @@ class TicketController
             session_start();
         }
         if (
-            !in_array($_SESSION["user"]["role"], ["developpeur", "admin"], true)
+            !in_array(
+                $_SESSION["user"]["role"],
+                ["developpeur", "admin", "rapporteur"],
+                true,
+            )
         ) {
             http_response_code(403);
-            echo "Accès refusé : réservé aux développeurs.";
+            echo "Accès refusé";
             exit();
         }
 
-        $tickets = Ticket::all();
+        $tickets = Ticket::getTicketsForUser(
+            $_SESSION["user"]["role"],
+            $_SESSION["user"]["id"],
+        );
         include __DIR__ . "/../Views/tickets/list_developer.php";
     }
 
@@ -70,6 +77,61 @@ class TicketController
         $projects = $clientId > 0 ? Ticket::getProjectsByClient($clientId) : [];
         include __DIR__ . "/../Views/tickets/create_rapporteur.php";
     }
+
+    public function deleteTicket(): void
+    {
+        session_start();
+        if (empty($_SESSION["user"])) {
+            http_response_code(403);
+            exit("Non authentifié.");
+        }
+
+        $ticketId = (int) ($_GET["id"] ?? 0);
+        if ($ticketId <= 0) {
+            http_response_code(400);
+            exit("ID de ticket invalide.");
+        }
+
+        $role = $_SESSION["user"]["role"];
+        $userId = $_SESSION["user"]["id"];
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare(
+            "SELECT id, user_id, status FROM tickets WHERE id = ?",
+        );
+        $stmt->execute([$ticketId]);
+        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$ticket) {
+            http_response_code(404);
+            exit("Ticket introuvable.");
+        }
+
+        if ($role === "admin") {
+            Ticket::deleteTicket($ticketId);
+        } elseif ($role === "rapporteur") {
+            if (
+                $ticket["user_id"] == $userId &&
+                $ticket["status"] === "closed"
+            ) {
+                Ticket::deleteTicket($ticketId);
+            } else {
+                http_response_code(403);
+                exit(
+                    "Accès refusé : vous ne pouvez supprimer que vos tickets fermés."
+                );
+            }
+        } else {
+            http_response_code(403);
+            exit(
+                "Accès refusé : seuls les administrateurs et rapporteurs peuvent supprimer des tickets."
+            );
+        }
+
+        header("Location: /ticket/list");
+        exit();
+    }
+
     /**
      * Return a JSON of projects linked to given client
      *
