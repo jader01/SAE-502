@@ -52,7 +52,7 @@ Puis ouvrez votre navigateur à l’adresse :
 ---
 
 ## Structure du projet
-
+```
  ├── app/
  │   ├── Controllers/     # Contrôleurs (logique applicative)
  │   ├── Models/          # Modèles (accès base de données)
@@ -63,6 +63,7 @@ Puis ouvrez votre navigateur à l’adresse :
  ├── public/              # Point d’entrée public
  ├── routes/              # routeur
  └── README.md
+```
 ---
 
 ## Rôles et accès
