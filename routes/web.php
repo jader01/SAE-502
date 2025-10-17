@@ -1,23 +1,29 @@
 <?php
 $request = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 switch ($request) {
     case "/":
-        if ($_SESSION["user"]["role"] === "developpeur") {
-            header("Location: /ticket/list");
+        if (isset($_SESSION["user"]) && isset($_SESSION["user"]["role"])) {
+            switch ($_SESSION["user"]["role"]) {
+                case "developpeur":
+                    header("Location: /ticket/list");
+                    exit();
+                case "rapporteur":
+                    header("Location: /ticket/create");
+                    exit();
+                case "admin":
+                    header("Location: /admin/dashboard");
+                    exit();
+                default:
+                    echo "Rôle inconnu.";
+                    exit();
+            }
+        } else {
+            header("Location: /login");
             exit();
         }
-        if ($_SESSION["user"]["role"] === "rapporteur") {
-            header("Location: /ticket/create");
-            exit();
-        }
-        if ($_SESSION["user"]["role"] === "admin") {
-            header("Location: /admin/dashboard");
-            exit();
-        }
-        // fallback
-        echo "Rôle inconnu.";
-        break;
 
     case "/admin":
 
@@ -36,17 +42,20 @@ switch ($request) {
         new AdminController()->handleProjects();
         break;
 
-    case "/projects":
-        require_once __DIR__ . "/../app/Controllers/TicketController.php";
-        require_once __DIR__ . "/../app/Controllers/AuthController.php";
-        AuthController::requireLogin();
-        new TicketController()->index();
+    case "/admin/users":
+        require_once __DIR__ . "/../app/Controllers/AdminController.php";
+        new AdminController()->handleUsers();
         break;
 
     case "/ticket/create":
         require_once __DIR__ . "/../app/Controllers/TicketController.php";
 
         new TicketController()->createForRapporteur();
+        break;
+
+    case "/admin/statistics":
+        require_once __DIR__ . "/../app/Controllers/AdminController.php";
+        new AdminController()->statisticsText();
         break;
 
     case "/ticket/take":
@@ -65,9 +74,26 @@ switch ($request) {
         break;
 
     case "/ticket/show":
+        require_once __DIR__ . "/../app/Controllers/AuthController.php";
+        AuthController::requireLogin();
         require_once __DIR__ . "/../app/Controllers/TicketController.php";
         new TicketController()->showTicket();
         break;
+
+    case "/ticket/delete":
+        require_once __DIR__ . "/../app/Controllers/AuthController.php";
+        AuthController::requireLogin();
+        require_once __DIR__ . "/../app/Controllers/TicketController.php";
+        new TicketController()->deleteTicket();
+        break;
+
+    case "/projects":
+        require_once __DIR__ . "/../app/Controllers/AuthController.php";
+        AuthController::requireLogin();
+
+        require_once __DIR__ . "/../app/Controllers/TicketController.php";
+        new TicketController()->fetchProjects();
+        exit();
 
     case "/login":
         require_once __DIR__ . "/../app/Controllers/AuthController.php";

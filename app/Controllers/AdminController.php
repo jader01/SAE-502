@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../Models/Ticket.php";
+require_once __DIR__ . "/../Models/User.php";
 require_once __DIR__ . "/../Models/Database.php";
 
 class AdminController
@@ -33,7 +34,6 @@ class AdminController
         include __DIR__ . "/../Views/admin/dashboard.php";
     }
 
-    /** Manage (list/add/delete) clients */
     public function handleClients(): void
     {
         $this->ensureAdmin();
@@ -53,7 +53,6 @@ class AdminController
             exit();
         }
 
-        // Delete client
         if (isset($_GET["delete"])) {
             $id = (int) $_GET["delete"];
             $db->prepare("DELETE FROM clients WHERE id = ?")->execute([$id]);
@@ -65,6 +64,52 @@ class AdminController
             ->query("SELECT * FROM clients ORDER BY id DESC")
             ->fetchAll(PDO::FETCH_ASSOC);
         include __DIR__ . "/../Views/admin/clients.php";
+    }
+
+    public function handleUsers(): void
+    {
+        $this->ensureAdmin(); // from your existing AdminController
+
+        $db = Database::getConnection();
+
+        // Handle deletion
+        if (isset($_GET["delete"])) {
+            $id = (int) $_GET["delete"];
+            if ($id !== $_SESSION["user"]["id"]) {
+                // prevent self-delete
+                User::deleteUser($id);
+            }
+            header("Location: /admin/users");
+            exit();
+        }
+
+        // Handle creation or update
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $username = trim($_POST["username"]);
+            $password = $_POST["password"] ?? "";
+            $role = $_POST["role"];
+
+            if (isset($_POST["id"]) && $_POST["id"] !== "") {
+                // Update existing user
+                $userId = (int) $_POST["id"];
+                User::updateUser(
+                    $userId,
+                    $username,
+                    $password ? $password : null,
+                    $role,
+                );
+            } else {
+                // Create new user
+                User::createUser($username, $password, $role);
+            }
+
+            header("Location: /admin/users");
+            exit();
+        }
+
+        // Fetch all users for display
+        $users = User::getAll();
+        include __DIR__ . "/../Views/admin/users.php";
     }
 
     /** Manage (list/add/delete) projects */
@@ -102,5 +147,14 @@ class AdminController
             ->query("SELECT * FROM projects ORDER BY id DESC")
             ->fetchAll(PDO::FETCH_ASSOC);
         include __DIR__ . "/../Views/admin/projects.php";
+    }
+
+    public function statisticsText(): void
+    {
+        $this->ensureAdmin();
+
+        $stats = Ticket::basicStats();
+
+        include __DIR__ . "/../Views/admin/statistics_text.php";
     }
 }

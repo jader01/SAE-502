@@ -167,4 +167,139 @@ class Ticket
         $stmt->execute([$ticketId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Retrieve tickets depending on user role.
+     *
+     * @param string $role   User role
+     * @param int    $userId User ID
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getTicketsForUser(string $role, int $userId): array
+    {
+        $db = Database::getConnection();
+
+        $baseQuery = <<<SQL
+            SELECT
+                t.*,
+                c.name AS client_name,
+                p.name AS project_name,
+                u.username AS rapporteur_name,
+                d.username AS developer_name
+            FROM tickets t
+            JOIN clients  c ON t.client_id    = c.id
+            JOIN projects p ON t.project_id   = p.id
+            LEFT JOIN users u ON t.user_id    = u.id
+            LEFT JOIN users d ON t.developer_id = d.id
+        SQL;
+
+        switch ($role) {
+            case "rapporteur":
+                $sql =
+                    $baseQuery .
+                    '
+                    WHERE t.user_id = ?
+                    ORDER BY t.created_at DESC
+                ';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$userId]);
+                break;
+
+            case "developpeur":
+                $sql =
+                    $baseQuery .
+                    '
+                    WHERE t.developer_id IS NULL OR t.developer_id = ?
+                    ORDER BY t.created_at DESC
+                ';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$userId]);
+                break;
+
+            case "admin":
+                $sql = $baseQuery . " ORDER BY t.created_at DESC";
+                $stmt = $db->query($sql);
+                break;
+
+            default:
+                return [];
+        }
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Delete a ticket by ID.
+     *
+     * @param int $ticketId
+     * @return void
+     */
+    public static function deleteTicket(int $ticketId): void
+    {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM tickets WHERE id = ?");
+        $stmt->execute([$ticketId]);
+    }
+
+    /**
+     * Get basic ticket statistics: totals by status, rapporteur, and developer.
+     *
+     * @return array<string, mixed>
+     */
+    public static function basicStats(): array
+    {
+        $db = Database::getConnection();
+
+        $statusStmt = $db->query("
+            SELECT status, COUNT(*) as total
+            FROM tickets
+            GROUP BY status
+        ");
+        $status = $statusStmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $rapStmt = $db->query("
+            SELECT u.username, COUNT(t.id) AS total
+            FROM tickets t
+            JOIN users u ON u.id = t.user_id
+            GROUP BY t.user_id
+            ORDER BY total DESC
+        ");
+        $rapporteurs = $rapStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Counts per developer
+        $devStmt = $db->query("
+            SELECT u.username, COUNT(t.id) AS total
+            FROM tickets t
+            JOIN users u ON u.id = t.developer_id
+            WHERE t.developer_id IS NOT NULL
+            GROUP BY t.developer_id
+            ORDER BY total DESC
+        ");
+        $developers = $devStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $day = $db
+            ->query(
+                "SELECT DATE(created_at) as date, COUNT(*) as total FROM tickets GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT 7",
+            )
+            ->fetchAll(PDO::FETCH_ASSOC);
+        $month = $db
+            ->query(
+                "SELECT strftime('%m', created_at) as month, COUNT(*) as total FROM tickets WHERE strftime('%Y', created_at)=strftime('%Y','now') GROUP BY month ORDER BY month",
+            )
+            ->fetchAll(PDO::FETCH_ASSOC);
+        $year = $db
+            ->query(
+                "SELECT strftime('%Y', created_at) as year, COUNT(*) as total FROM tickets GROUP BY year ORDER BY year DESC",
+            )
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            "status" => $status,
+            "rapporteurs" => $rapporteurs,
+            "developers" => $developers,
+            "day" => $day,
+            "month" => $month,
+            "year" => $year,
+        ];
+    }
 }
