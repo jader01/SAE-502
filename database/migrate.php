@@ -23,4 +23,4 @@ foreach ($files as $file) {
     file_put_contents($appliedFile, $name . PHP_EOL, FILE_APPEND);
 }
 
-echo "✅ Migrations complete.\n";
+echo "Migrations complete.\n";

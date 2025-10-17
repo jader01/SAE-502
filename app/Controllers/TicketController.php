@@ -5,11 +5,13 @@ require_once __DIR__ . "/../Controllers/AuthController.php";
 class TicketController
 {
     /**
-     * List of all tickets for devs
+     * List all accessible tickets depending on user role.
      *
-     * require developpeur role
+     * Roles allowed: developpeur, rapporteur, admin.
+     *
+     * @return void
      */
-    public function listForDeveloper(): void
+    public function list(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -30,17 +32,19 @@ class TicketController
             $_SESSION["user"]["role"],
             $_SESSION["user"]["id"],
         );
-        include __DIR__ . "/../Views/tickets/list_developer.php";
+        include __DIR__ . "/../Views/tickets/list.php";
     }
 
     /**
-     * Display the creation form
+     * Display and process ticket creation form.
      *
-     * require rapporteur role
-     * On POST: Create new ticket
-     * On GET: display the form
+     * Roles allowed: rapporteur, admin.
+     * On GET: show form.
+     * On POST: create new ticket.
+     *
+     * @return void
      */
-    public function createForRapporteur(): void
+    public function create(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -69,18 +73,28 @@ class TicketController
                 $priority,
                 $user_id,
             );
-            header("Location: /ticket/create?success=1");
+            header("Location: /ticket/list");
             exit();
         }
         $clientId = isset($_GET["client_id"]) ? (int) $_GET["client_id"] : 0;
         $clients = Ticket::getClients();
         $projects = $clientId > 0 ? Ticket::getProjectsByClient($clientId) : [];
-        include __DIR__ . "/../Views/tickets/create_rapporteur.php";
+        include __DIR__ . "/../Views/tickets/create.php";
     }
 
+    /**
+     * Delete a ticket.
+     *
+     * Admin: Can delete any.
+     * Rapporteur: Can delete own unassigned or closed tickets.
+     *
+     * @return void
+     */
     public function deleteTicket(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (empty($_SESSION["user"])) {
             http_response_code(403);
             exit("Non authentifié.");
@@ -110,15 +124,16 @@ class TicketController
         if ($role === "admin") {
             Ticket::deleteTicket($ticketId);
         } elseif ($role === "rapporteur") {
-            if (
-                $ticket["user_id"] == $userId &&
-                $ticket["status"] === "closed"
-            ) {
+            $isOwner = $ticket["user_id"] == $userId;
+            $isClosed = $ticket["status"] === "closed";
+            $isUnassigned = empty($ticket["developer_id"]);
+
+            if ($isOwner && ($isClosed || $isUnassigned)) {
                 Ticket::deleteTicket($ticketId);
             } else {
                 http_response_code(403);
                 exit(
-                    "Accès refusé : vous ne pouvez supprimer que vos tickets fermés."
+                    "Accès refusé : vous ne pouvez supprimer que vos tickets non assignés ou fermés."
                 );
             }
         } else {
@@ -133,9 +148,12 @@ class TicketController
     }
 
     /**
-     * Return a JSON of projects linked to given client
+     * Fetch all projects linked to a given client (AJAX endpoint).
      *
      * URL: /projects?client_id={id}
+     * Roles allowed: rapporteur, admin.
+     *
+     * @return void
      */
     public function fetchProjects(): void
     {
@@ -165,9 +183,18 @@ class TicketController
         exit();
     }
 
+    /**
+     * Allow a developer to assign themselves to a ticket.
+     *
+     * Roles allowed: developpeur, admin.
+     *
+     * @return void
+     */
     public function takeTicket(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (
             !in_array($_SESSION["user"]["role"], ["developpeur", "admin"], true)
         ) {
@@ -183,9 +210,19 @@ class TicketController
         exit();
     }
 
+    /**
+     * Update a ticket's evolution or status.
+     *
+     * Roles allowed: developpeur, admin.
+     * Rejects modification of closed tickets.
+     *
+     * @return void
+     */
     public function updateTicket(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (
             !in_array($_SESSION["user"]["role"], ["developpeur", "admin"], true)
         ) {
@@ -197,6 +234,23 @@ class TicketController
             $ticketId = (int) $_POST["ticket_id"];
             $evolution = $_POST["evolution"];
             $status = $_POST["status"];
+
+            $current = Database::getConnection()->prepare(
+                "SELECT status FROM tickets WHERE id = ?",
+            );
+            $current->execute([$ticketId]);
+            $ticket = $current->fetch(PDO::FETCH_ASSOC);
+
+            if (!$ticket) {
+                http_response_code(404);
+                exit("Ticket introuvable.");
+            }
+
+            if ($ticket["status"] === "closed") {
+                http_response_code(403);
+                exit("Impossible de modifier un ticket fermé.");
+            }
+
             Ticket::updateEvolution($ticketId, $evolution, $status);
 
             Ticket::logEvolution(
@@ -205,15 +259,99 @@ class TicketController
                 $evolution,
                 $status,
             );
+
+            header("Location: /ticket/list");
+            exit();
         }
 
         header("Location: /ticket/list");
         exit();
     }
 
+    /**
+     * Edit ticket details (admin only).
+     *
+     * Shows edit form on GET; updates ticket on POST.
+     *
+     * @return void
+     */
+    public function editTicket(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!in_array($_SESSION["user"]["role"], ["admin"], true)) {
+            http_response_code(403);
+            exit("Accès refusé.");
+        }
+
+        $ticketId = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
+        if ($ticketId <= 0) {
+            http_response_code(400);
+            exit("ID de ticket invalide.");
+        }
+
+        $db = Database::getConnection();
+
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $title = trim($_POST["title"]);
+            $description = trim($_POST["description"]);
+            $priority = $_POST["priority"];
+            $status = $_POST["status"];
+            $evolution = $_POST["evolution"];
+
+            $stmt = $db->prepare("
+                UPDATE tickets
+                SET title = ?, description = ?, priority = ?, status = ?, evolution = ?,
+                    developer_id = ?, user_id = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ");
+            $stmt->execute([
+                $title,
+                $description,
+                $priority,
+                $status,
+                $evolution,
+                $_POST["developer_id"] ?: null,
+                $_POST["rapporteur_id"] ?: null,
+                $ticketId,
+            ]);
+
+            header("Location: /ticket/list");
+            exit();
+        }
+
+        $stmt = $db->prepare("SELECT * FROM tickets WHERE id = ?");
+        $stmt->execute([$ticketId]);
+        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$ticket) {
+            http_response_code(404);
+            exit("Ticket introuvable.");
+        }
+        $devStmt = $db->query(
+            "SELECT id, username FROM users WHERE role = 'developpeur'",
+        );
+        $developers = $devStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $rapStmt = $db->query(
+            "SELECT id, username FROM users WHERE role = 'rapporteur'",
+        );
+        $rapporteurs = $rapStmt->fetchAll(PDO::FETCH_ASSOC);
+        include __DIR__ . "/../Views/tickets/edit.php";
+    }
+
+    /**
+     * Display a ticket’s details and its evolution history.
+     *
+     * @return void
+     */
     public function showTicket(): void
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $ticketId = (int) ($_GET["id"] ?? 0);
         if ($ticketId <= 0) {
             http_response_code(404);
