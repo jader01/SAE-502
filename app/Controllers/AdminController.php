@@ -5,6 +5,10 @@ require_once __DIR__ . "/../Models/Database.php";
 
 class AdminController
 {
+    /**
+     * Ensure current user has admin role.
+     * Exits with 403 if not.
+     */
     private function ensureAdmin(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -16,6 +20,11 @@ class AdminController
         }
     }
 
+    /**
+     * Display the admin dashboard with global counts.
+     *
+     * @return void
+     */
     public function dashboard(): void
     {
         $this->ensureAdmin();
@@ -34,6 +43,13 @@ class AdminController
         include __DIR__ . "/../Views/admin/dashboard.php";
     }
 
+    /**
+     * List, add, or delete clients.
+     *
+     * Handles GET for listing and deletion; POST for new client insertion.
+     *
+     * @return void
+     */
     public function handleClients(): void
     {
         $this->ensureAdmin();
@@ -66,13 +82,19 @@ class AdminController
         include __DIR__ . "/../Views/admin/clients.php";
     }
 
+    /**
+     * Manage users (list, add, edit, delete).
+     *
+     * Prevents self‑deletion for the current admin.
+     *
+     * @return void
+     */
     public function handleUsers(): void
     {
         $this->ensureAdmin(); // from your existing AdminController
 
         $db = Database::getConnection();
 
-        // Handle deletion
         if (isset($_GET["delete"])) {
             $id = (int) $_GET["delete"];
             if ($id !== $_SESSION["user"]["id"]) {
@@ -83,7 +105,6 @@ class AdminController
             exit();
         }
 
-        // Handle creation or update
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $username = trim($_POST["username"]);
             $password = $_POST["password"] ?? "";
@@ -99,7 +120,6 @@ class AdminController
                     $role,
                 );
             } else {
-                // Create new user
                 User::createUser($username, $password, $role);
             }
 
@@ -107,18 +127,22 @@ class AdminController
             exit();
         }
 
-        // Fetch all users for display
         $users = User::getAll();
         include __DIR__ . "/../Views/admin/users.php";
     }
 
-    /** Manage (list/add/delete) projects */
+    /**
+     * Manage projects (list, add, delete).
+     *
+     * Handles project CRUD tied to clients.
+     *
+     * @return void
+     */
     public function handleProjects(): void
     {
         $this->ensureAdmin();
         $db = Database::getConnection();
 
-        // Add project
         if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["name"])) {
             $stmt = $db->prepare(
                 "INSERT INTO projects (name, description, client_id) VALUES (?, ?, ?)",
@@ -132,7 +156,6 @@ class AdminController
             exit();
         }
 
-        // Delete project
         if (isset($_GET["delete"])) {
             $id = (int) $_GET["delete"];
             $db->prepare("DELETE FROM projects WHERE id = ?")->execute([$id]);
@@ -144,17 +167,29 @@ class AdminController
             ->query("SELECT id, name FROM clients")
             ->fetchAll(PDO::FETCH_ASSOC);
         $projects = $db
-            ->query("SELECT * FROM projects ORDER BY id DESC")
+            ->query(
+                "
+                SELECT p.*, c.name AS client_name
+                FROM projects p
+                JOIN clients c ON p.client_id = c.id
+                ORDER BY p.id DESC
+            ",
+            )
             ->fetchAll(PDO::FETCH_ASSOC);
         include __DIR__ . "/../Views/admin/projects.php";
     }
 
-    public function statisticsText(): void
+    /**
+     * Display basic ticket statistics for admin users.
+     *
+     * @return void
+     */
+    public function statistics(): void
     {
         $this->ensureAdmin();
 
         $stats = Ticket::basicStats();
 
-        include __DIR__ . "/../Views/admin/statistics_text.php";
+        include __DIR__ . "/../Views/admin/statistics.php";
     }
 }

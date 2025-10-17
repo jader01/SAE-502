@@ -4,9 +4,9 @@ require_once __DIR__ . "/Database.php";
 class Ticket
 {
     /**
-     * Retrieve all tickets from the database.
+     * Retrieve all tickets ordered by creation date.
      *
-     * @return array<int, array<string, mixed>> List of tickets
+     * @return array<int, array<string, mixed>> List of all tickets
      */
     public static function all()
     {
@@ -15,6 +15,11 @@ class Ticket
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Retrieve all clients.
+     *
+     * @return array<int, array<string, mixed>> List of clients
+     */
     public static function getClients(): array
     {
         $db = Database::getConnection();
@@ -22,7 +27,11 @@ class Ticket
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Get distinct projects
+    /**
+     * Retrieve all projects.
+     *
+     * @return array<int, array<string, mixed>> List of projects
+     */
     public static function getProjects(): array
     {
         $db = Database::getConnection();
@@ -31,15 +40,14 @@ class Ticket
     }
 
     /**
-     * Create a new ticket in the database.
+     * Create a new ticket record.
      *
-     * @param string $title       Title of the ticket
-     * @param string $description Description of the ticket
-     * @param int    $project_id  project ID
-     * @param int    $client_id   client ID
-     * @param string $priority    Ticket priority (p1,p2,p3)
-     * @param int|null $user_id   Rapporteur  ID
-     *
+     * @param string   $title       Ticket title
+     * @param string   $description Ticket description
+     * @param int      $project_id  Linked project ID
+     * @param int      $client_id   Linked client ID
+     * @param string   $priority    Ticket priority (p1, p2, p3)
+     * @param int|null $user_id     Rapporteur user ID
      * @return void
      */
     public static function create(
@@ -67,11 +75,10 @@ class Ticket
     }
 
     /**
-     * Get all projects from client
+     * Retrieve projects belonging to a specific client.
      *
-     * @param int $clientId client ID
-     *
-     * @return array<int, array<string, mixed>> List of projects
+     * @param int $clientId Client ID
+     * @return array<int, array<string, mixed>> List of projects for the client
      */
     public static function getProjectsByClient(int $clientId): array
     {
@@ -84,10 +91,10 @@ class Ticket
     }
 
     /**
-     * Assign the current developer to a ticket and move status to in_progress.
+     * Assign a developer to a ticket and mark it as in progress.
      *
-     * @param int $ticketId Ticket ID
-     * @param int $developerId Developer's user ID
+     * @param int $ticketId   Ticket ID
+     * @param int $developerId Developer user ID
      * @return void
      */
     public static function assignToDeveloper(
@@ -104,11 +111,11 @@ class Ticket
     }
 
     /**
-     * Update ticket evolution and status.
+     * Update ticket evolution and/or status.
      *
-     * @param int $ticketId Ticket ID
-     * @param string $evolution Description of fix or progress
-     * @param string $status New ticket status ('in_progress' | 'closed')
+     * @param int    $ticketId  Ticket ID
+     * @param string $evolution Developer evolution comment
+     * @param string $status    New ticket status
      * @return void
      */
     public static function updateEvolution(
@@ -126,12 +133,12 @@ class Ticket
     }
 
     /**
-     * Record a new change (evolution) for a ticket.
+     * Log a new evolution entry for a ticket.
      *
-     * @param int $ticketId Ticket ID
-     * @param int $changedBy User ID who performed the change
-     * @param string $comment Comment describing the change
-     * @param string|null $newStatus New status after change (optional)
+     * @param int         $ticketId   Ticket ID
+     * @param int         $changedBy  User ID who made the change
+     * @param string      $comment    Description of the change
+     * @param string|null $newStatus  Optional new ticket status
      * @return void
      */
     public static function logEvolution(
@@ -149,10 +156,10 @@ class Ticket
     }
 
     /**
-     * Retrieve the full evolution history for a ticket.
+     * Retrieve evolution history for a given ticket.
      *
-     * @param int $ticketId
-     * @return array<int, array<string, mixed>> List of changes
+     * @param int $ticketId Ticket ID
+     * @return array<int, array<string, mixed>> List of evolution entries
      */
     public static function getEvolutionHistory(int $ticketId): array
     {
@@ -169,11 +176,11 @@ class Ticket
     }
 
     /**
-     * Retrieve tickets depending on user role.
+     * Retrieve tickets visible to a specific user based on role.
      *
      * @param string $role   User role
      * @param int    $userId User ID
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>> List of tickets
      */
     public static function getTicketsForUser(string $role, int $userId): array
     {
@@ -206,13 +213,12 @@ class Ticket
                 break;
 
             case "developpeur":
-                $sql =
-                    $baseQuery .
-                    '
-                    WHERE t.developer_id IS NULL OR t.developer_id = ?
-                    ORDER BY t.created_at DESC
-                ';
-                $stmt = $db->prepare($sql);
+                $stmt = $db->prepare("
+                        $baseQuery
+                        WHERE (t.developer_id IS NULL OR t.developer_id = ?)
+                          AND t.status != 'closed'
+                        ORDER BY t.created_at DESC
+                    ");
                 $stmt->execute([$userId]);
                 break;
 
@@ -229,9 +235,9 @@ class Ticket
     }
 
     /**
-     * Delete a ticket by ID.
+     * Delete a ticket by its ID.
      *
-     * @param int $ticketId
+     * @param int $ticketId Ticket ID
      * @return void
      */
     public static function deleteTicket(int $ticketId): void
@@ -242,9 +248,10 @@ class Ticket
     }
 
     /**
-     * Get basic ticket statistics: totals by status, rapporteur, and developer.
+     * Compute basic ticket statistics.
+     * Includes totals per status, rapporteur, developer, and time range.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed> Summary statistics
      */
     public static function basicStats(): array
     {
@@ -266,7 +273,6 @@ class Ticket
         ");
         $rapporteurs = $rapStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Counts per developer
         $devStmt = $db->query("
             SELECT u.username, COUNT(t.id) AS total
             FROM tickets t
@@ -279,7 +285,7 @@ class Ticket
 
         $day = $db
             ->query(
-                "SELECT DATE(created_at) as date, COUNT(*) as total FROM tickets GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT 7",
+                "SELECT DATE(created_at) as date, COUNT(*) as total FROM tickets GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT 30",
             )
             ->fetchAll(PDO::FETCH_ASSOC);
         $month = $db
