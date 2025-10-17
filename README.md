@@ -17,8 +17,8 @@ Elle inclut une gestion des rôles (`admin`, `rapporteur`, `developpeur`) avec d
 ### 1. Cloner le dépôt
 
 ```bash
-git clone <votre-url-depot>
-cd <votre-dossier-projet>
+git clone https://github.com/jader01/SAE-502
+cd SAE-502
 ```
 
 ### 2. (Ré)initialiser la base de données
