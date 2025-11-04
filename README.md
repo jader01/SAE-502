@@ -2,7 +2,7 @@
 
 Application web légère en PHP (architecture MVC) permettant la gestion de tickets, de clients et de projets.
 Elle inclut une gestion des rôles (`admin`, `rapporteur`, `developpeur`) avec droits d’accès différenciés et des statistiques globales.
-Voici le [Tutoriel utilisateur](SAE-502/SAE 502 BEAUFRETON RUEDA Rapport.pdf)
+Voici le [Tutoriel utilisateur](SAE-502/SAE%502%BEAUFRETON%RUEDA%Rapport.pdf).
 
 ---
 
