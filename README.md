@@ -5,7 +5,8 @@ Elle inclut une gestion des rôles (`admin`, `rapporteur`, `developpeur`) avec d
 Voici le [Tutoriel utilisateur](SAE%502%BEAUFRETON%RUEDA%Rapport.pdf)
 
 Merci a [toi](https://github.com/XanderBuilds) pour l'aide !
-Projet réalisé en binome : [✨](https://github.com/CPTHOMBO)
+Projet réalisé en binome avec : [✨](https://github.com/CPTHOMBO)
+
 ---
 
 ## Prérequis
