@@ -4,6 +4,8 @@ Application web légère en PHP (architecture MVC) permettant la gestion de tick
 Elle inclut une gestion des rôles (`admin`, `rapporteur`, `developpeur`) avec droits d’accès différenciés et des statistiques globales.
 Voici le [Tutoriel utilisateur](SAE%502%BEAUFRETON%RUEDA%Rapport.pdf)
 
+Merci a [toi](https://https://github.com/XanderBuilds)!
+
 ---
 
 ## Prérequis
